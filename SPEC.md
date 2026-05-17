@@ -92,7 +92,37 @@ USV パーサーは以下の minimal ルールで実装可能:
    - renderer は cell content を **そのまま** あるいは **Markdown → HTML →
      plain text のいずれかに解釈** して表示する (renderer の責任)
 
-### 2.3 Cell content の renderer 解釈モード (規範外、参考)
+### 2.3 格納可能コンテンツの普遍性 (Universal Cell Content) — 規範的核心
+
+> ## **U+001E と U+001F を含まない文字列は、すべて cell content として
+> ## そのまま格納可能。**
+
+これが USV の核心ルール。仕様の **唯一の禁制** は「cell content に
+U+001E (RS) と U+001F (US) を含めないこと」のみ。
+
+格納可能なものの例 (網羅的ではない):
+
+| 種別 | 例 |
+|---|---|
+| **Unicode 文字すべて** | 絵文字 🎉、CJK 商品、Math 𝒜∫∞、古代文字 𓀀、絵柄 ░▒▓█、… |
+| **制御文字 (U+001E/001F 以外)** | `\n` / `\r` / `\t` / NUL `\0` / ベル / ANSI escape `\x1b[…` |
+| **markup 言語** | Markdown / HTML / XML / LaTeX / JSON / YAML / TOML / RST / AsciiDoc / BBCode / MediaWiki / troff / SGML |
+| **コード** | Python / JavaScript / Rust / Go / SQL / shell / regex / sed script |
+| **画像 / 媒体** | Base64 / data URI / SVG inline / `<canvas>` のシリアライズ |
+| **URI scheme** | `https:` `mailto:` `ssh:` `git:` `magnet:` `tel:` `geo:` `data:` |
+| **多言語混在** | 日本語 / English / 中文 / 한국어 / العربية / עברית を 1 cell に混ぜる |
+| **構造化データ (escape 不要)** | JSON object、YAML block、CSV のような quote 文字を含む文字列 |
+
+renderer がこれをどう解釈するかは § 2.4 を参照。**Storage layer (USV
+パース層) は完全にニュートラル** — cell の中身を判定せず、ただ US/RS で
+区切るだけ。
+
+> 💡 **escape は不要**。content に U+001E / U+001F が技術的に必要な
+> 場合は **U+241E / U+241F (Unicode 可視変種)** を代替として使う。
+> しかし通常用途ではこれらの制御文字が cell に含まれることはない
+> (普通のテキスト・コード・markup に出現しないため)。
+
+### 2.4 Cell content の renderer 解釈モード (規範外、参考)
 
 cell content をどう描画するかは renderer 自由だが、以下 3 モードが想定される:
 
