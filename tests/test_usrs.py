@@ -254,3 +254,51 @@ def test_no_csv_quoting_needed_for_newlines():
     # Round-trip preserves the newlines
     parsed = loads(text)
     assert parsed.rows[1][1].count("\n") == 3
+
+
+# ---------------------------------------------------------------------------
+# Cell content freedom: tab / Markdown / HTML are all just cell content
+# ---------------------------------------------------------------------------
+
+def test_tab_in_cell_is_cell_content():
+    """\\t is NOT a column separator in USV — it's cell-internal indentation."""
+    code = "def f():\n\treturn 42"   # Python function with tab indent
+    rows = [["snippet"], [code]]
+    parsed = loads(dumps(rows))
+    assert parsed.rows[1][0] == code
+    assert "\t" in parsed.rows[1][0]
+    # Crucially: the tab does NOT cause a split into multiple columns
+    assert len(parsed.rows[1]) == 1
+
+
+def test_markdown_in_cell_passes_through():
+    """Markdown syntax in a cell is preserved verbatim — renderer interprets."""
+    md = "## Section\n\n**Bold**, *italic*, `code`, [link](https://example.com).\n\n- list 1\n- list 2"
+    rows = [["doc"], [md]]
+    parsed = loads(dumps(rows))
+    assert parsed.rows[1][0] == md
+    # Markdown control chars (`*`, `#`, `[]`, backtick) must survive
+    for token in ("##", "**", "*italic*", "`code`", "[link]", "(https"):
+        assert token in parsed.rows[1][0]
+
+
+def test_html_in_cell_passes_through():
+    """HTML in a cell is preserved — security is the renderer's responsibility."""
+    html = '<b>bold</b> and <a href="https://example.com">link</a><br/><svg width="10"/>'
+    rows = [["html_cell"], [html]]
+    parsed = loads(dumps(rows))
+    assert parsed.rows[1][0] == html
+    # No quoting / escaping — the raw HTML is intact
+    assert "<b>" in parsed.rows[1][0]
+    assert "<svg" in parsed.rows[1][0]
+
+
+def test_cell_with_tab_indent_markdown_html_combo():
+    """All three (tab, Markdown, HTML) in the same cell — USV is agnostic."""
+    cell = "## Hello\n\tindented line\n<br/><kbd>Ctrl</kbd>+<kbd>C</kbd>"
+    rows = [["mixed"], [cell]]
+    parsed = loads(dumps(rows))
+    assert parsed.rows[1][0] == cell
+    assert "\t" in parsed.rows[1][0]
+    assert "<kbd>" in parsed.rows[1][0]
+    assert "## " in parsed.rows[1][0]
