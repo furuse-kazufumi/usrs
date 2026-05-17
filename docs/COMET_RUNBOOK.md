@@ -85,15 +85,31 @@ git push -u origin main
 ```markdown
 Hi Joel,
 
-I've been following the USV concept with great interest. I noticed
+I'm Kazufumi Furuse, an individual OSS developer based in Japan
+(GitHub: https://github.com/furuse-kazufumi). I've been following the
+USV concept with great interest. I noticed
 [`draft-unicode-separated-values-01`](https://datatracker.ietf.org/doc/draft-unicode-separated-values/)
 expired in 2024 and the work hasn't progressed toward IANA/IETF since.
 The format deserves another push — especially now that LLM/AI tooling
 desperately needs a robust tabular text format that survives Markdown /
 HTML / CJK / multi-line content without escaping.
 
-I'd like to help revive it. I've prototyped three additions that I
-think strengthen the spec without changing its core:
+## Why I'm reaching out now: LLM ⇄ human dialogue
+
+My day-to-day work involves building a local LLM framework (llive),
+and the *single biggest source of friction* in LLM ⇄ human table-data
+exchange is format fragility:
+
+- AI emits Markdown tables → broken alignment with CJK / emoji
+- AI emits CSV → quoting / escape failures, especially on multi-line cells
+- AI emits JSON → readable for machines but painful to grep at a terminal
+
+USV solves all three at once. I'd like to position USV as **the
+canonical tabular format for LLM ⇄ human dialogue**, in addition to
+its original general-purpose role. That framing alone should give the
+revival a strong tailwind in 2026.
+
+## Three concrete additions I've prototyped
 
 1. **Grid-line semantics** — define US as the vertical rule and RS as
    the horizontal rule, so the separators double as rendering hints
@@ -106,11 +122,11 @@ think strengthen the spec without changing its core:
    that demonstrates Markdown / HTML cell rendering side-by-side with
    the table — useful as a showcase for editor / terminal integrators
 
-I have a small prototype repo with these additions, a 31-test suite
-(all passing), and a draft promotion strategy for engaging editor
-projects (Linguist / VS Code / Neovim / Helix / Zed / JetBrains).
+I have a prototype repo with these additions, a 31-test suite (all
+passing), and a draft promotion strategy for engaging editor projects
+(Linguist / VS Code / Neovim / Helix / Zed / JetBrains).
 
-Two paths from here, and I'm flexible on which one:
+## Two paths — I'm flexible
 
 - **Option A**: Contribute upstream to SixArm/usv as a series of PRs
   (spec text + reference impl + viewer + promotion docs)
@@ -118,20 +134,23 @@ Two paths from here, and I'm flexible on which one:
   `draft-unicode-separated-values-02`** to resubmit to IETF, refreshing
   the spec with the additions and reactivating the standards path
 
-Would you be open to either? I'm happy to do most of the writing /
-review work; I just want to make sure your original vision is honored
-and that the credit reflects your foundational contribution.
+Would you be open to either? I'm happy to do most of the writing and
+review work; the goal is to honor your original vision and make sure
+the credit reflects your foundational contribution.
 
-About me:
-- Japanese OSS developer, individual contributor
-- Building the FullSense umbrella OSS (llive / llove / llmesh) in my spare time
-- Prototype repo: https://github.com/furuse-kazufumi/usrs
+## About me
 
-Thanks for the foundational work on USV. Looking forward to your thoughts.
+- **Kazufumi Furuse**, Japan-based individual OSS developer
+- GitHub: https://github.com/furuse-kazufumi
+- Building the FullSense umbrella OSS — llive (LLM memory framework),
+  llove (TUI), llmesh (LLM hub) — in my spare time
+- Prototype repo for this USV proposal: https://github.com/furuse-kazufumi/usrs
+- Email: kazufumi@furuse.work
+
+Thank you for the foundational work on USV. Looking forward to your thoughts.
 
 Best regards,
-Kazufumi Furuse (furuse-kazufumi)
-Email: kazufumi@furuse.work
+Kazufumi Furuse
 ```
 
 4. **Submit new issue** ボタンをクリック
