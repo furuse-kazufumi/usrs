@@ -302,3 +302,66 @@ def test_cell_with_tab_indent_markdown_html_combo():
     assert "\t" in parsed.rows[1][0]
     assert "<kbd>" in parsed.rows[1][0]
     assert "## " in parsed.rows[1][0]
+
+
+# ---------------------------------------------------------------------------
+# 規範核心: "U+001E と U+001F を含まない文字列はすべて格納可能"
+# ---------------------------------------------------------------------------
+
+def test_storage_universality_unicode():
+    """Emoji / CJK / math / ancient scripts all pass through verbatim."""
+    samples = [
+        "🎉 celebration",
+        "商品 (商品名)",
+        "한국어 텍스트",
+        "数式 𝒜 ∫ ∞ ∇",
+        "古代 𓀀 𓁂 𓂀 𓏏",
+        "絵柄 ░ ▒ ▓ █",
+        "العربية / עברית",
+    ]
+    rows = [["sample"]] + [[s] for s in samples]
+    parsed = loads(dumps(rows))
+    for original, parsed_row in zip(samples, parsed.rows[1:]):
+        assert parsed_row[0] == original
+
+
+def test_storage_universality_control_chars_except_separators():
+    """All non-separator control chars survive."""
+    # Bell (\x07), vertical tab (\x0b), form feed (\x0c), ESC (\x1b)
+    cell = "before\x07middle\x0b\x0c\x1b[31mred\x1b[0mafter"
+    rows = [["c"], [cell]]
+    parsed = loads(dumps(rows))
+    assert parsed.rows[1][0] == cell
+    # Confirm separators 001E / 001F are NOT in the cell (would break parsing)
+    assert "\x1e" not in cell
+    assert "\x1f" not in cell
+
+
+def test_storage_universality_nested_formats():
+    """A cell can carry JSON, YAML, LaTeX, even a CSV-style string with quotes."""
+    samples = [
+        '{"key": "value", "nested": {"a": [1, 2, 3]}}',
+        "name: USV\nversion: 0.1.0\nfeatures:\n  - universal cells\n  - no escape",
+        r"\sum_{i=0}^{n} \frac{x_i}{2} = \int_0^\infty e^{-x} dx",
+        '"a","b","c with comma, inside"',   # CSV-quoted string — survives intact
+        "<svg><circle cx='5' cy='5' r='3'/></svg>",
+    ]
+    rows = [["format"]] + [[s] for s in samples]
+    parsed = loads(dumps(rows))
+    for original, parsed_row in zip(samples, parsed.rows[1:]):
+        assert parsed_row[0] == original
+
+
+def test_storage_universality_uri_schemes():
+    """All URI schemes are just text content."""
+    samples = [
+        "https://example.com/path?q=1&r=2",
+        "mailto:user@example.com",
+        "ssh://git@github.com:22/path.git",
+        "data:image/png;base64,iVBORw0KGgo...",
+        "magnet:?xt=urn:btih:c12fe1c06bba254a9dc9f519b335aa7c1367a88a",
+    ]
+    rows = [["uri"]] + [[s] for s in samples]
+    parsed = loads(dumps(rows))
+    for original, parsed_row in zip(samples, parsed.rows[1:]):
+        assert parsed_row[0] == original
