@@ -173,23 +173,31 @@ Kazufumi Furuse
 ```
 Hi Joel,
 
-I just opened an issue on github.com/SixArm/usv:
+I'm Kazufumi Furuse, a Japan-based individual OSS developer
+(https://github.com/furuse-kazufumi). I just opened an issue on
+github.com/SixArm/usv:
 
   <Step 4 で取得した Issue URL>
 
-It's a proposal to help revive the USV work — the IETF draft expired
+It's a proposal to help revive the USV work. The IETF draft expired
 in 2024 and I'd like to either contribute as upstream PRs or co-author
 a fresh draft-02 with you. Three concrete additions are described in
 the issue (grid-line semantics, optional width metadata, a 2-pane
-viewer).
+Textual viewer).
 
-I emailed instead of waiting purely on GitHub notifications since the
-datatracker noted your email might be stale; if this address is also
-out of date please let me know how best to reach you.
+A second motivation: I'm building a local LLM framework (llive), and
+USV looks like the right answer for LLM ⇄ human table-data dialogue
+(no escaping for Markdown / HTML / CJK / multi-line cells). I think
+2026 is a strong moment to relaunch USV with that framing alongside
+its general-purpose role.
+
+I emailed in addition to GitHub since the datatracker noted your email
+might be stale; if this address is also out of date please let me know
+how best to reach you.
 
 Best regards,
 Kazufumi Furuse
-GitHub: @furuse-kazufumi
+GitHub: @furuse-kazufumi  (https://github.com/furuse-kazufumi)
 Email: kazufumi@furuse.work
 Prototype: https://github.com/furuse-kazufumi/usrs
 ```
