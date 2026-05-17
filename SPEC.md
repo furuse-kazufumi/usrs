@@ -74,13 +74,42 @@ USV パーサーは以下の minimal ルールで実装可能:
    - US が 0 個の行は 1 列、US が 2 個の行は 3 列
    - 不揃いの行は **最大列数に合わせて右側を空 cell で補う** (renderer 自由、
      データ層は不揃いを保持してよい)
-4. **改行はセル内コンテンツ** (重要、CSV との差別化):
-   - 改行 `\n` (U+000A) と CR `\r` (U+000D) は **行区切りには使わない**
-   - 行区切りは **RS (U+001E) のみ**
-   - cell 内に `\n` がそのまま含まれて構わない = **マルチラインセル** を
-     escape なしで表現可能
-   - CSV の「カンマや改行を含むときは `"` で quote」のような複雑なルールは
-     **不要**
+4. **改行・タブ・Markdown・HTML はすべて cell 内コンテンツ** (重要、CSV との差別化):
+   - **予約された制御文字は US (U+001F) と RS (U+001E) の 2 文字のみ**
+   - **それ以外の文字はすべて cell の中身として通過する**
+   - 結果として cell 内に以下を自由に埋め込める:
+
+   | 種別 | 扱い | 例 |
+   |---|---|---|
+   | 改行 `\n` / `\r\n` | cell 内改行 (マルチライン cell) | 詩、長文、コードスニペット |
+   | タブ `\t` | cell 内インデント | コードブロック、構造化テキスト |
+   | **Markdown** | cell 内 Markdown 記述 | `**bold**`, `[link](url)`, `# heading`, ``` ```code``` ``` |
+   | **HTML** | cell 内 HTML タグ | `<b>bold</b>`, `<a href="...">`, `<svg>` |
+   | 絵文字 / CJK | cell 内通過 | 🍎, 商品, 한국어 |
+   | NUL `\0` (U+0000) | cell 内通過 (推奨しない) | binary-ish data も技術的には許容 |
+
+   - **CSV の `"` 周りの quoting / escape ルールは存在しない** — 必要なし
+   - renderer は cell content を **そのまま** あるいは **Markdown → HTML →
+     plain text のいずれかに解釈** して表示する (renderer の責任)
+
+### 2.3 Cell content の renderer 解釈モード (規範外、参考)
+
+cell content をどう描画するかは renderer 自由だが、以下 3 モードが想定される:
+
+| モード | 解釈 | ユースケース |
+|---|---|---|
+| **plain** (default) | cell content をそのまま等幅で描画。`\n` で改行、`\t` でタブ幅展開 | ターミナル `bat`、`cat` 等 |
+| **markdown** | cell content を Markdown として render | ブラウザ、IDE preview |
+| **html** | cell content を HTML として描画 (XSS リスクは受信側責任) | Web UI、信頼できる入力源 |
+
+renderer は `%USRS render=markdown` のような header 拡張、または UI 側
+設定で mode を切り替える (本仕様では mode 自体は規定しない)。
+
+> ⚠️ **HTML モードのセキュリティ警告**: cell に raw HTML を許容すると XSS
+> 注入リスク。USV を **信頼できない入力源** から読む場合は plain or
+> markdown モードに留め、HTML render は禁止すること。仕様レベルでは
+> 「HTML を埋められる」を保証するが、「HTML を render するかは renderer
+> 判断」 — 強い分離。
    - 例:
 
 ```
