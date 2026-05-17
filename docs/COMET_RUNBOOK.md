@@ -85,9 +85,10 @@ git push -u origin main
 ```markdown
 Hi Joel,
 
-I'm Kazufumi Furuse, an individual OSS developer based in Japan
-(GitHub: https://github.com/furuse-kazufumi). I've been following the
-USV concept with great interest. I noticed
+I'm Kazufumi Furuse (@furuse-kazufumi), an individual OSS developer
+based in Japan. **Date of this proposal: 2026-05-17 JST.**
+
+I've been following the USV concept with great interest. I noticed
 [`draft-unicode-separated-values-01`](https://datatracker.ietf.org/doc/draft-unicode-separated-values/)
 expired in 2024 and the work hasn't progressed toward IANA/IETF since.
 The format deserves another push — especially now that LLM/AI tooling
