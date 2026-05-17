@@ -14,9 +14,10 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-Copyright 2026 furuse-kazufumi and USRS contributors
+Copyright 2026 furuse-kazufumi and USRS / USV contributors
 
-NOTE: This project is dual-licensed:
-  - Apache License 2.0 for OSS use (this file)
-  - Commercial dual-license available for SaaS / enterprise use cases.
-    Contact the maintainer for terms.
+This project is released under the **Apache License 2.0** — free for both
+OSS and commercial use. Use it, fork it, embed it in your editor,
+terminal, library, or product. Attribution per Apache-2.0 is appreciated.
+
+We want USV to be **as widely adopted as CSV**. Pure OSS, no strings.
