@@ -160,51 +160,84 @@ Kazufumi Furuse
 
 ---
 
-## Step 5 — Joel に直接メール送信
+## Step 5 — GitHub Discussions も使う (Issue の補強、公開記録の二重化)
+
+> ⚠️ **重要原則**: ここからは **公開チャネル優先**。私的メールは知財
+> エビデンスとして弱いため、後段 (Step 5.5) に格下げする。GitHub の
+> 公開タイムスタンプは prior art として機能し、アイデアパクリ防止になる。
 
 **操作**:
-1. メールクライアント (Gmail / Outlook / 任意) を開く
-2. 以下を入力:
-   - **To**: `joel@joelparkerhenderson.com`
-   - **From**: `kazufumi@furuse.work`
-   - **Subject**: `Reviving USV — proposal via GitHub Issue #<番号>` (Step 4 で取得した Issue 番号)
-   - **Body**:
+1. `https://github.com/SixArm/usv/discussions` を開く
+2. 「Discussions」タブが存在しない場合は **このステップを skip**
+3. 存在する場合は「New discussion」をクリックし、Category を「Ideas」or「General」に設定
+4. **Title**: `[Discussion] Reviving USV for the LLM/AI era`
+5. **Body** に以下を貼り付け:
+
+```markdown
+Cross-referencing my Issue #<Issue 番号> for community discussion.
+
+I'd like to gather feedback from the broader USV community on reviving
+the spec with three additions:
+
+1. Grid-line semantics (US = vertical rule, RS = horizontal rule)
+2. Optional cell width metadata (UAX #11 compliant)
+3. 2-pane Textual viewer (Python reference impl)
+
+Particularly interested in feedback from:
+- Editor / terminal developers (VS Code, Neovim, Helix, Zed, etc.)
+- LLM tooling builders (USV looks ideal for AI ⇄ human table dialogue)
+- IETF participants (revival path discussion)
+
+Prototype: https://github.com/furuse-kazufumi/usrs
+Issue: <Step 4 で取得した Issue URL>
+
+— Kazufumi Furuse (Japan-based OSS developer)
+```
+
+6. **Start discussion** をクリック
+
+**完了条件**: Discussion が公開され URL が取得できる (これも prior art になる)
+
+---
+
+## Step 5.5 — 直接メール (オプション、補助のみ)
+
+> ⚠️ **このステップは慎重に判断**。Joel への私的メールは公開記録に残らず、
+> アイデアパクリの保険にならない。送るとしても **「Issue/Discussion を
+> 立てた通知」だけ** に短縮し、技術内容は重複させない。
+>
+> 通常推奨: **このステップは skip**。GitHub Issue + Discussion で十分。
+> Joel が見落とすリスクが心配な場合のみ送る。
+
+**送るとしたら**:
+- **To**: `joel@joelparkerhenderson.com`
+- **Subject**: `FYI: opened a USV revival proposal on GitHub`
+- **Body** (短く、内容は Issue にリンクで誘導のみ):
 
 ```
 Hi Joel,
 
-I'm Kazufumi Furuse, a Japan-based individual OSS developer
-(https://github.com/furuse-kazufumi). I just opened an issue on
-github.com/SixArm/usv:
+Quick FYI — I posted a USV revival proposal as a public GitHub issue
+and discussion (links below). Full technical details and contributions
+are documented there for transparency and prior-art clarity.
 
-  <Step 4 で取得した Issue URL>
+  Issue: <Step 4 URL>
+  Discussion: <Step 5 URL>
+  My prototype: https://github.com/furuse-kazufumi/usrs
 
-It's a proposal to help revive the USV work. The IETF draft expired
-in 2024 and I'd like to either contribute as upstream PRs or co-author
-a fresh draft-02 with you. Three concrete additions are described in
-the issue (grid-line semantics, optional width metadata, a 2-pane
-Textual viewer).
+Happy to chat in either channel. Looking forward to your input.
 
-A second motivation: I'm building a local LLM framework (llive), and
-USV looks like the right answer for LLM ⇄ human table-data dialogue
-(no escaping for Markdown / HTML / CJK / multi-line cells). I think
-2026 is a strong moment to relaunch USV with that framing alongside
-its general-purpose role.
-
-I emailed in addition to GitHub since the datatracker noted your email
-might be stale; if this address is also out of date please let me know
-how best to reach you.
-
-Best regards,
-Kazufumi Furuse
-GitHub: @furuse-kazufumi  (https://github.com/furuse-kazufumi)
-Email: kazufumi@furuse.work
-Prototype: https://github.com/furuse-kazufumi/usrs
+— Kazufumi Furuse (Japan, @furuse-kazufumi)
 ```
 
-3. **送信**
+**完了条件**: メール送信、または skip 判定の記録
 
-**完了条件**: メール送信完了。Sent box に記録される
+> 💡 **知財エビデンスの優先順位**:
+> 1. GitHub Issue (公開、permalink、タイムスタンプ自動付与) ★最強
+> 2. GitHub Discussion (同上、議論性高)
+> 3. IETF Datatracker submission (公的記録、永続)
+> 4. Qiita / LinkedIn / HN 記事 (3rd party 公開記録)
+> 5. 私的メール (証拠としては弱、補助のみ)
 
 ---
 
