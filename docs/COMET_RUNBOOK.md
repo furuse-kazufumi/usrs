@@ -371,6 +371,25 @@ References:
 3. **個人攻撃禁止**: 既存 USV の「停滞」「expired」を批判的に書かない、事実中立
 4. **車輪の再発明と書かない**: 「revival」「refresh」「additional contribution」と表現
 5. **メールアドレス**: 一貫して `kazufumi@furuse.work` を使用
+6. **GitHub URL を明記**: `https://github.com/furuse-kazufumi` を Issue / メール / 記事すべてに含める
+7. **AI ⇄ 人間対話の用途を強調**: LLM/AI 時代の表データ format という新文脈で USV を再位置付け、これが 2026 年の追い風
+
+## 文化的配慮 (Joel への接触で重要)
+
+Joel Parker Henderson の背景:
+- **アメリカ合衆国** (San Francisco, CA + Bozeman, MT)
+- Brown University / Columbia University 卒、シリコンバレーのシリアル OSS contributor
+- 393 GitHub repos / 1.7k followers の経験豊富な開発者
+- 英語ネイティブ
+
+接触時のトーン規範:
+- **アメリカ式の直接的・簡潔・敬意ある英語** で書く
+- 日本流の過度な謙譲 (`I'm sorry to bother you`, `I am unworthy to suggest`) は **避ける** — 欧米では弱腰・自信不足と受け取られ、本気度を疑われる
+- `I'd like to...` `I'm happy to...` `Would you be open to...` のレベルが適切
+- アメリカ英語綴り (`honored`, `organize`, `behavior` — UK 綴り `honoured`, `organise`, `behaviour` は使わない)
+- 連絡時間帯への配慮: 米国西海岸時間 (PT)。JST から 16-17 時間遅れ。日本の早朝 = SF の前日午後、日本の夜 = SF の朝 (これは即時返信を期待しない、メール後 24-72 時間は静かに待つ)
+- 日本人であることを **明示** ("Japan-based individual OSS developer") — 文化的バイアスを生むことはなく、むしろグローバルコラボレーションへの open さを示す
+- LLM/AI 文脈は彼の関心領域にも合う可能性 (SixArm は AI 関連 OSS も複数公開)
 
 ## エラー対処
 
