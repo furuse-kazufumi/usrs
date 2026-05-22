@@ -1,49 +1,44 @@
-# USRS — Unit/Record Separator Spec (file format: **USV** `.usv`)
+# USV — tables that don't break on CJK or emoji
 
-> CSV / TSV に並ぶ **USV (Unit-Separated Values)** — 罫線描画と連動する
-> 整形可能テキスト表形式。ASCII 1967 から眠っていた `U+001F` / `U+001E`
-> を再活性化、Unicode 図形 `␟` / `␞` 形式も同時サポート。
+> **The pain:** your Markdown table looks fine until someone drops `みかん`,
+> `😀`, or a multi-line cell into it — and now the whole thing is a slanted
+> mess in every renderer except yours.
+>
+> **The fix:** **USV (Unit-Separated Values)** — a tiny text format that
+> uses the ASCII 1967 `U+001F` / `U+001E` separators *plus* per-cell
+> display-width metadata, so editors / browsers / terminals all draw the
+> same aligned table.
 
-| 規格 | 区切り文字 | 拡張子 | MIME |
-|---|---|---|---|
-| CSV | `,` | `.csv` | `text/csv` |
-| TSV | `\t` (U+0009) | `.tsv` | `text/tab-separated-values` |
-| **USV** | **`\x1f` (U+001F) + `\x1e` (U+001E)** | **`.usv`** | **`text/usv`** (proposed) |
+<!-- TODO: add 30s GIF — "Markdown breaks → switch to .usv → aligned everywhere" -->
+<!-- placeholder: docs/assets/usv-demo.gif -->
 
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![Status: RFC draft](https://img.shields.io/badge/Status-RFC_draft-orange.svg)](SPEC.md)
+[日本語 README](README_JA.md) ・ [SPEC](SPEC.md) ・ [Discussion #1](https://github.com/furuse-kazufumi/usrs/discussions/1) ・ [SixArm/usv #14 (revival proposal)](https://github.com/SixArm/usv/issues/14)
 
-## なぜ作るのか
+---
 
-タブ区切り (TSV) と CSV は半世紀前から表データの事実上の標準だが、
-**罫線・整形描画とセル幅が連動しない** ため:
+## 60-second pitch
 
-- タブ幅が 4/8 等で設定依存
-- CJK 全角・絵文字の表示幅補正なし
-- proportional フォントでパディングが効かない
-- Markdown 表は renderer が空白を trim する
+| Format | Separator | Breaks on CJK / emoji? | Breaks on multi-line cell? | Lossless round-trip? |
+|---|---|---|---|---|
+| CSV | `,` | yes (renderer-dependent) | needs quoting + escaping | tricky (RFC 4180 corners) |
+| TSV | `\t` | yes (tab width = 4? 8?) | no multi-line support | yes (no tabs in cells) |
+| Markdown table | `\|` | **yes** (any non-ASCII) | **no** (illegal) | n/a (rendering format) |
+| **USV** | **`\x1F`** (Unit) + **`\x1E`** (Record) | **no** (UAX #11 width tags) | **yes** (any char allowed in cell) | **yes** (TSV ⇄ USV) |
 
-**データと描画の責務が混ざっている**ことが根本問題。USRS は「データ +
-セル表示幅メタを 1 ストリームに同居」させ、エディタ・ブラウザ・
-ターミナルが**同じ規則で罫線を引ける**世界を目指す。
+---
 
-## Quick Start
-
-### Python
+## Quick start (3 lines)
 
 ```python
 from usrs import dumps, loads, render
 
-rows = [
-    ["商品", "個数", "備考"],
-    ["Apple", "5", "甘い"],
-    ["みかん", "12", "酸っぱい"],
-]
-text = dumps(rows, with_width=True, header_widths=[8, 4, 10])
+text = dumps([["商品","個数","備考"], ["Apple","5","甘い"], ["みかん","12","酸っぱい"]], with_width=True)
 print(render(loads(text)))
 ```
 
-出力:
+Output (renders identically in any monospace terminal):
 
 ```
 ┌──────────┬──────┬────────────┐
@@ -54,84 +49,137 @@ print(render(loads(text)))
 └──────────┴──────┴────────────┘
 ```
 
-### CLI
+CLI:
 
 ```bash
-# TSV → USRS 変換 (lossless)
-python -m usrs from-tsv data.tsv > data.usrs
-
-# USRS → アラインメント済の表 (端末表示)
-python -m usrs render data.usrs
-
-# USRS → TSV に戻す (lossless)
-python -m usrs to-tsv data.usrs > data.tsv
+python -m usrs from-tsv  data.tsv  > data.usv   # TSV → USV (lossless)
+python -m usrs render    data.usv               # aligned table to terminal
+python -m usrs to-tsv    data.usv  > data.tsv   # USV → TSV (lossless)
 ```
 
-## 仕様の核
+---
 
-| 役割 | ASCII 制御変種 | Unicode 可視変種 |
-|---|---|---|
-| セル間 (Unit) | `U+001F` | `␟` (U+241F) |
-| 行間 (Record) | `U+001E` | `␞` (U+241E) |
-| 表ブロック (Group) | `U+001D` | `␝` (U+241D) |
-| ファイル (File) | `U+001C` | `␜` (U+241C) |
+## Before / after — Markdown vs USV
 
-- **ASCII 制御変種** がデフォルト (TSV 互換、`\t` → `\x1F` の機械置換で導入可能)
-- **Unicode 可視変種** は HTTP form / メール pipeline で制御文字が剥がされる
-  場合に使用 (両形式は decoder で透過的に受け入れ)
+A real table with CJK, emoji, and a multi-line cell.
 
-セル幅メタは `W<digits>:<本文>` の prefix で表現:
+### Before — Markdown (broken)
 
+````markdown
+| Product | Qty | Note          |
+|---------|-----|---------------|
+| Apple   | 5   | sweet         |
+| みかん  | 12  | 酸っぱい 🍊   |
+| バナナ  | 8   | 常温保存可
+   (室温 25℃ 以下)            |
+````
+
+Renders in GitHub as a column-misaligned, broken-on-newline mess; renders
+*differently* in VS Code preview, Obsidian, and pandoc. The pipe character
+in `室温 25℃` doesn't break parsing — but the newline inside the cell does.
+
+### After — USV (`.usv`)
+
+```python
+from usrs import dumps
+rows = [
+    ["Product", "Qty", "Note"],
+    ["Apple",   "5",   "sweet"],
+    ["みかん",  "12",  "酸っぱい 🍊"],
+    ["バナナ",  "8",   "常温保存可\n(室温 25℃ 以下)"],   # newline is fine
+]
+print(dumps(rows, with_width=True))
 ```
-W2:Hi    ← 表示幅 2 桁
-W6:商品名  ← 表示幅 6 桁 (全角 3 文字)
-```
 
-詳細は [SPEC.md](SPEC.md) を参照。
+Every renderer that understands USV (terminal `render()`, future VS Code
+extension, future `<usv-table>` Web Component) draws **the same**
+column-aligned, multi-line-cell-respecting table — because the width
+metadata travels with the data.
 
-## 既存規格との関係
+See [examples/comparison/markdown_table_breaks.md](examples/comparison/markdown_table_breaks.md)
+for 5 more side-by-side cases.
 
-- **ASCII 1967 / ISO/IEC 646** の Information Separators (U+001C-001F) を活用
-- **Unicode UAX #11** East Asian Width を幅計算の規範として参照
-- **Unicode Control Pictures** (U+2400-241F) を可視化変種に流用
-- **RFC 4180 (CSV)** / **TSV (IANA `text/tab-separated-values`)** の後継候補
-- **Markdown table** とは双方向変換可能 (`usrs from-md` / `usrs to-md` 予定)
+---
 
-## プロジェクト構成
+## Why `U+001F` is safe (gotchas, honestly)
+
+ASCII reserved `U+001C`-`U+001F` as **Information Separators** in 1967 —
+designed for exactly this job — and almost nobody uses them. That makes
+them collision-free in real data, which is the whole point.
+
+**It works in:**
+- file I/O, pipes, sockets, sqlite TEXT columns, JSON strings (escaped
+  as ``), zip archives, git blobs, tar, S3 objects
+- modern terminals (they ignore unrecognised C0 codes by default)
+- any UTF-8-clean toolchain
+
+**It can get stripped in:**
+- HTML form submissions, some email gateways, paste filters of
+  "rich text" editors, naive `printf "%s"` in old shells
+
+**For those cases USV has a Unicode visible variant** — `␟` (U+241F) /
+`␞` (U+241E) — and the decoder accepts either. So you pick the wire
+format that survives your pipeline; the data is the same.
+
+→ Full rules in [SPEC.md §3](SPEC.md). Limits and non-goals are listed
+  honestly in [PROMOTION.md §0](PROMOTION.md).
+
+---
+
+## What's in this repo
 
 ```
 usrs/
-├── SPEC.md                # 規範的仕様 (RFC 草案)
-├── README.md              # 本ファイル
-├── PROMOTION.md           # 普及戦略ガイドライン
-├── CONTRIBUTING.md        # コミュニティ参加ガイド
-├── LICENSE                # Apache-2.0
-├── src/
-│   └── usrs.py            # Python 参考実装
-├── examples/              # サンプルファイル (.usrs)
-├── docs/                  # 設計判断ログ・ロゴ・図表
-└── tests/                 # 回帰テスト
+├── SPEC.md                # normative spec (RFC draft)
+├── README.md  README_JA.md
+├── src/usrs.py            # Python reference implementation (~330 LOC)
+├── examples/
+│   ├── sales.usv          # tiny sample file
+│   ├── sales_unicode.usv  # same data, U+241F variant
+│   ├── llm_prompts/       # prompt templates for Claude / GPT / Gemini
+│   └── comparison/        # Markdown-table-breaks side-by-side
+├── docs/                  # design log, related work, contact plan
+└── tests/                 # 23 round-trip + edge-case tests
 ```
 
-## ロードマップ
+---
 
-| Phase | 内容 |
+## Roadmap
+
+| Phase | Scope |
 |---|---|
-| **0.1.0** (本草案) | SPEC + Python encode/decode + TSV round-trip テスト |
-| 0.2.0 | 端末 renderer (色付き)、Markdown ⇄ USRS converter |
-| 0.3.0 | VS Code extension (`.usrs` を表で表示) |
-| 0.4.0 | Web Component (`<usrs-table>`)、Rust 実装 |
-| 0.5.0 | gh-pages にプレイグラウンド、各種エディタプラグイン |
-| 1.0.0 | RFC として IETF Draft 提出検討 |
+| **0.1.0** (this draft) | SPEC + Python encode/decode + TSV round-trip |
+| 0.2.0 | Colour terminal renderer; Markdown ⇄ USV converter |
+| 0.3.0 | VS Code extension (`.usv` as table view) |
+| 0.4.0 | Web Component (`<usv-table>`); Rust implementation |
+| 0.5.0 | gh-pages playground; editor plugins (Neovim / JetBrains / Obsidian) |
+| 1.0.0 | IETF Draft submission |
 
-## ライセンス
+---
 
-[Apache-2.0](LICENSE) (OSS) + Commercial dual-license。OSS 利用は自由、
-商用 SaaS / SI 案件のみ別契約。
+## Related work
 
-## コミュニティ
+USV is **not the first try**. [SixArm/usv](https://github.com/SixArm/usv)
+(Joel Parker Henderson, 2022 — currently quiet) reached an IETF Draft
+v01 then went dormant. We've opened a **revival proposal upstream** at
+[SixArm/usv#14](https://github.com/SixArm/usv/issues/14) — the goal is
+either to feed our additions back in, or co-author a fresh IETF draft
+together. See [docs/RELATED_WORK.md](docs/RELATED_WORK.md) for the full
+prior-art map (ASCII 1967, RFC 4180, IANA TSV, UAX #11, Control Pictures).
 
-- 課題報告 / 機能要望: GitHub Issues
-- 設計議論: GitHub Discussions
-- 普及活動ガイド: [PROMOTION.md](PROMOTION.md)
-- コントリビューションガイド: [CONTRIBUTING.md](CONTRIBUTING.md)
+Community discussion lives in
+[Discussion #1](https://github.com/furuse-kazufumi/usrs/discussions/1).
+
+---
+
+## License
+
+[Apache-2.0](LICENSE) (OSS) + Commercial dual-license. OSS use is free;
+only commercial SaaS / SI engagements need a separate agreement.
+
+## Community
+
+- Bug reports / feature requests → GitHub Issues
+- Design discussion → [GitHub Discussions](https://github.com/furuse-kazufumi/usrs/discussions)
+- Adoption strategy → [PROMOTION.md](PROMOTION.md)
+- Contribution guide → [CONTRIBUTING.md](CONTRIBUTING.md)
