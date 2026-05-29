@@ -139,7 +139,7 @@ usrs/
 │   ├── llm_prompts/       # prompt templates for Claude / GPT / Gemini
 │   └── comparison/        # Markdown-table-breaks side-by-side
 ├── docs/                  # design log, related work, contact plan
-└── tests/                 # 23 round-trip + edge-case tests
+└── tests/                 # 31 round-trip + edge-case tests
 ```
 
 ---
